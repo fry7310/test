@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>No FBI</title>
+    <style>
+        body, h1, h2 {
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #000;
+            color: #0f0;
+            font-size: 20px;
+            overflow: hidden;
+        }
+        .terminal {
+            padding: 20px;
+            background-color: #111;
+            border: 2px solid #0f0;
+            display: flex;
+            flex-direction: column;
+        }
+        .output {
+            flex: 1;
+            overflow-y: auto;
+        }
+        .input {
+            margin-top: 10px;
+        }
+        .prompt {
+            display: inline-block;
+            width: 90%;
+            color: #0f0;
+        }
+        .cursor {
+            display: inline-block;
+            margin-left: 5px;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+        .typewriter {
+            display: inline-block;
+            white-space: nowrap;
+            overflow: hidden;
+            border-right: 4px solid #0f0;
+        }
+    </style>
+</head>
+<body>
+ 
+<div class="container">
+    <div class="terminal">
+        <h1 class="typewriter" id="typewriter"></h1>
+        <div class="output">
+            <p><span class="prompt">user@system:~$ </span><br><span class="command">fry_</span></p>
+            <p><span class="prompt">user@system:~$ </span><span class="command">ls -la /root</span></p>
+        </div>
+        <div class="input">
+            <span class="prompt">user@system:~$ </span>
+            <span class="cursor" style="font-size: 20px;">_</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    const texts = [
+        "赤井秀一，搞清楚谁部署谁",
+        "早上记得喂狗"
+    ];
+    let currentTextIndex = 0;
+    let isDeleting = false;
+    let typewriterElement = document.getElementById("typewriter");
+    let typingSpeed = 120;
+    let deletingSpeed = 50;
+    let pauseTime = 3000;
+
+    function typeText() {
+        let currentText = texts[currentTextIndex];
+        let displayText = typewriterElement.innerText;
+        
+        if (!isDeleting) {
+            // Typing effect
+            typewriterElement.innerText = currentText.substring(0, displayText.length + 1);
+            if (displayText.length + 1 === currentText.length) {
+                // Pause before deleting
+                setTimeout(() => {
+                    isDeleting = true;
+                    typeText();
+                }, pauseTime);
+                return;
+            }
+        } else {
+            // Deleting effect
+            typewriterElement.innerText = displayText.substring(0, displayText.length - 1);
+            if (displayText.length === 0) {
+                isDeleting = false;
+                currentTextIndex = (currentTextIndex + 1) % texts.length;
+            }
+        }
+        
+        setTimeout(typeText, isDeleting ? deletingSpeed : typingSpeed);
+    }
+
+    // Start the typing effect
+    typeText();
+</script>
+
+</body>
+</html>
+
