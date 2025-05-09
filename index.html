@@ -16,103 +16,95 @@
             height: 100vh;
             background-color: #000;
             color: #0f0;
-            font-size: 20px;
+            font-size: 16px;
             overflow: hidden;
         }
         .terminal {
             padding: 20px;
             background-color: #111;
             border: 2px solid #0f0;
+            width: 400px;
+            max-width: 90%;
+            height: auto;
+            min-height: 200px;
+            text-align: left;
             display: flex;
             flex-direction: column;
+            justify-content: space-between;
         }
         .output {
-            flex: 1;
+            margin-bottom: 15px;
+            flex-grow: 1;
             overflow-y: auto;
         }
-        .input {
-            margin-top: 10px;
+        .buttons {
+            display: flex;
+            justify-content: space-between;
         }
-        .prompt {
-            display: inline-block;
-            width: 90%;
-            color: #0f0;
+        .buttons button {
+            background-color: #0f0;
+            color: #000;
+            border: none;
+            padding: 5px 15px;
+            cursor: pointer;
         }
-        .cursor {
-            display: inline-block;
-            margin-left: 5px;
-            animation: blink 1s infinite;
-        }
-        @keyframes blink {
-            50% { opacity: 0; }
-        }
-        .typewriter {
-            display: inline-block;
-            white-space: nowrap;
-            overflow: hidden;
-            border-right: 4px solid #0f0;
+        .buttons button:hover {
+            background-color: #0a0;
         }
     </style>
 </head>
 <body>
- 
 <div class="container">
     <div class="terminal">
-        <h1 class="typewriter" id="typewriter"></h1>
-        <div class="output">
-            <p><span class="prompt">user@system:~$ </span><br><span class="command">fry_</span></p>
-            <p><span class="prompt">user@system:~$ </span><span class="command">ls -la /root</span></p>
-        </div>
-        <div class="input">
-            <span class="prompt">user@system:~$ </span>
-            <span class="cursor" style="font-size: 20px;">_</span>
+        <div class="output" id="outputText">Loading</div>
+        <div class="buttons">
+            <button onclick="showText('pre')">Pre</button>
+            <button onclick="showText('next')">Next</button>
         </div>
     </div>
 </div>
 
 <script>
     const texts = [
-        "赤井秀一，搞清楚谁部署谁",
-        "早上记得喂狗"
+        "Bonne nuit, mon agent.",
+        "照烧鸡肉饭和鲷鱼汤口味很像我之前在福冈一家名店的口味，我开始怀疑你是不是特意进修过，还是研究生的技能加成？",
+        "迟来的...培根奶油口蘑浓汤和干酪法棍，白葡萄酒醒在酒柜二层",
     ];
-    let currentTextIndex = 0;
-    let isDeleting = false;
-    let typewriterElement = document.getElementById("typewriter");
-    let typingSpeed = 120;
-    let deletingSpeed = 50;
-    let pauseTime = 3000;
 
-    function typeText() {
-        let currentText = texts[currentTextIndex];
-        let displayText = typewriterElement.innerText;
-        
-        if (!isDeleting) {
-            // Typing effect
-            typewriterElement.innerText = currentText.substring(0, displayText.length + 1);
-            if (displayText.length + 1 === currentText.length) {
-                // Pause before deleting
-                setTimeout(() => {
-                    isDeleting = true;
-                    typeText();
-                }, pauseTime);
-                return;
-            }
-        } else {
-            // Deleting effect
-            typewriterElement.innerText = displayText.substring(0, displayText.length - 1);
-            if (displayText.length === 0) {
-                isDeleting = false;
-                currentTextIndex = (currentTextIndex + 1) % texts.length;
-            }
-        }
-        
-        setTimeout(typeText, isDeleting ? deletingSpeed : typingSpeed);
+    let currentIndex = 0;
+    let loadingInterval;
+    let loadingText = "Loading";
+    let dotCount = 0;
+
+    // 在页面加载时自动显示Loading动画
+    window.onload = function() {
+        startLoadingAnimation();
+    };
+
+    // 启动Loading动画
+    function startLoadingAnimation() {
+        loadingInterval = setInterval(() => {
+            dotCount = (dotCount + 1) % 7;
+            document.getElementById('outputText').innerText = loadingText + '.'.repeat(dotCount);
+        }, 300);
     }
 
-    // Start the typing effect
-    typeText();
-</script>
+    // 停止Loading动画
+    function stopLoadingAnimation() {
+        clearInterval(loadingInterval);
+        document.getElementById('outputText').innerText = texts[currentIndex];
+    }
 
+    // 显示文本并清除Loading动画
+    function showText(direction) {
+        stopLoadingAnimation();
+        if (direction === 'next') {
+            currentIndex = (currentIndex + 1) % texts.length;
+        } else {
+            currentIndex = (currentIndex - 1 + texts.length) % texts.length;
+        }
+        document.getElementById('outputText').innerText = texts[currentIndex];
+    }
+</script>
 </body>
 </html>
-
