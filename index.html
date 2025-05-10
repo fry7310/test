@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>No FBI</title>
+    <title>Coffee or Cookie?</title>
     <style>
         body, h1, h2 {
             margin: 0;
@@ -23,10 +23,10 @@
             padding: 20px;
             background-color: #111;
             border: 2px solid #0f0;
-            width: 400px;
+            width: 600px;
             max-width: 90%;
             height: auto;
-            min-height: 200px;
+            min-height: 300px;
             text-align: left;
             display: flex;
             flex-direction: column;
@@ -36,75 +36,132 @@
             margin-bottom: 15px;
             flex-grow: 1;
             overflow-y: auto;
+            max-height: 200px;
+            white-space: pre-wrap;
+            word-break: break-word;
         }
-        .buttons {
+        .output .message {
+            margin-top: 10px;
+        }
+        .buttons, .input-area {
             display: flex;
             justify-content: space-between;
         }
-        .buttons button {
+        .buttons button, .input-area button {
             background-color: #0f0;
             color: #000;
             border: none;
-            padding: 5px 15px;
+            padding: 5px 10px;
             cursor: pointer;
+            transition: background-color 0.3s;
         }
-        .buttons button:hover {
+        .buttons button:hover, .input-area button:hover {
             background-color: #0a0;
+        }
+        .input-area input {
+            flex: 1;
+            padding: 5px;
+            background-color: #000;
+            border: 1px solid #0f0;
+            color: #0f0;
+        }
+        .output button {
+            background-color: #000;
+            color: #0f0;
+            border: 1px solid #0f0;
+            margin-left: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .output button:hover {
+            background-color: #0f0;
+            color: #000;
         }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="terminal">
-        <div class="output" id="outputText">Loading</div>
+        <div class="output" id="outputText">Loading...</div>
         <div class="buttons">
             <button onclick="showText('pre')">Pre</button>
             <button onclick="showText('next')">Next</button>
+        </div>
+        <div class="input-area">
+            <input type="text" id="username" placeholder="Username" />
+            <input type="text" id="userInput" placeholder="Your message here..." />
+            <button onclick="postMessage()">Post</button>
         </div>
     </div>
 </div>
 
 <script>
     const texts = [
-        "Bonne nuit, mon agent.",
-        "照烧鸡肉饭和鲷鱼汤很像我之前在福冈吃过的一家名店的口味，我开始怀疑你是不是特意进修过，还是研究生的技能加成？",
-        "迟来的...培根奶油口蘑浓汤和干酪法棍，白葡萄酒醒在酒柜二层",
+        "Manques.",
+        "冷藏二层上新：杜松子酒，果味汽水，苏打水，牛奶。如果你需要枫糖浆或者红石榴糖浆，打开橱柜下面的抽屉可以看到。",
+        "狗粮减量10%左右。哈罗体重超标，需各部门重视。", 
+        "在半张小票的背面：UIF IPMMPX NBO"
     ];
 
     let currentIndex = 0;
     let loadingInterval;
-    let loadingText = "Loading";
-    let dotCount = 0;
 
-    // 在页面加载时自动显示Loading动画
     window.onload = function() {
         startLoadingAnimation();
+        loadMessages();
     };
 
-    // 启动Loading动画
     function startLoadingAnimation() {
         loadingInterval = setInterval(() => {
-            dotCount = (dotCount + 1) % 7;
-            document.getElementById('outputText').innerText = loadingText + '.'.repeat(dotCount);
+            document.getElementById('outputText').innerText = "Loading" + '.'.repeat((Date.now() / 300) % 7);
         }, 300);
     }
 
-    // 停止Loading动画
     function stopLoadingAnimation() {
         clearInterval(loadingInterval);
-        document.getElementById('outputText').innerText = texts[currentIndex];
+        displayTextWithMessages();
     }
 
-    // 显示文本并清除Loading动画
     function showText(direction) {
         stopLoadingAnimation();
-        if (direction === 'next') {
-            currentIndex = (currentIndex + 1) % texts.length;
-        } else {
-            currentIndex = (currentIndex - 1 + texts.length) % texts.length;
-        }
-        document.getElementById('outputText').innerText = texts[currentIndex];
+        currentIndex = direction === 'next' ? (currentIndex + 1) % texts.length : (currentIndex - 1 + texts.length) % texts.length;
+        displayTextWithMessages();
+    }
+
+    function displayTextWithMessages() {
+        const outputText = document.getElementById("outputText");
+        outputText.innerText = texts[currentIndex];
+        const messages = JSON.parse(localStorage.getItem("messages_" + currentIndex)) || [];
+        messages.forEach((msg, index) => outputText.innerHTML += `<div class='message'>${msg} <button onclick="deleteMessage(${index})">Delete</button></div>`);
+    }
+
+    function postMessage() {
+        const username = document.getElementById("username").value.trim() || "Anonymous";
+        const message = document.getElementById("userInput").value.trim();
+        if (!message) return alert("Message cannot be empty.");
+
+        saveMessage(username, message);
+        document.getElementById("userInput").value = "";
+        displayTextWithMessages();
+    }
+
+    function saveMessage(username, message) {
+        let messages = JSON.parse(localStorage.getItem("messages_" + currentIndex)) || [];
+        messages.push(`${username}@system:~$ ${message}`);
+        localStorage.setItem("messages_" + currentIndex, JSON.stringify(messages));
+    }
+
+    function deleteMessage(index) {
+        let messages = JSON.parse(localStorage.getItem("messages_" + currentIndex)) || [];
+        messages.splice(index, 1);
+        localStorage.setItem("messages_" + currentIndex, JSON.stringify(messages));
+        displayTextWithMessages();
+    }
+
+    function loadMessages() {
+        displayTextWithMessages();
     }
 </script>
 </body>
 </html>
+
